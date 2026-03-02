@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formulario de Elegibilidad — InsurePro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<style>
+/* ===================== VARIABLES ===================== */
+:root {
+  --bg: #f0f4f8;
+  --bg2: #e8edf2;
+  --surface: #ffffff;
+  --surface2: #f7f9fc;
+  --border: #d0d9e4;
+  --border2: #b8c5d3;
+  --primary: #1a5fa8;
+  --primary-light: #2272c3;
+  --primary-ultra: #e8f0fb;
+  --accent: #0ea47a;
+  --accent-light: #e6f7f3;
+  --text: #1a2535;
+  --text2: #4a5a6e;
+  --text3: #7a8fa5;
+  --danger: #d93025;
+  --warn: #f59e0b;
+  --gold: #f0a500;
+  --shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07);
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+[data-theme="dark"] {
+  --bg: #0d1b2a;
+  --bg2: #111e2d;
+  --surface: #162435;
+  --surface2: #0f1e2d;
+  --border: rgba(255,255,255,0.09);
+  --border2: rgba(255,255,255,0.14);
+  --primary: #4899e8;
+  --primary-light: #5aabf5;
+  --primary-ultra: rgba(72,153,232,0.12);
+  --accent: #00c2a8;
+  --accent-light: rgba(0,194,168,0.12);
+  --text: #e8f0f8;
+  --text2: #8aa8c4;
+  --text3: #5a7a98;
+  --shadow: 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+/* ===================== RESET ===================== */
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.3s,color 0.3s}
+
+/* ===================== HEADER ===================== */
+.app-header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 28px;display:flex;align-items:center;justify-content:space-between;
+  height:60px;position:sticky;top:0;z-index:200;box-shadow:var(--shadow-sm);
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:18px;height:18px;fill:white}
+.logo-text{font-size:1rem;font-weight:700;color:var(--text);letter-spacing:-0.02em}
+.logo-text span{color:var(--primary)}
+.header-center{display:flex;flex-direction:column;align-items:center;gap:3px}
+.header-title{font-size:0.78rem;color:var(--text2);font-weight:500}
+.progress-wrap{display:flex;align-items:center;gap:8px}
+.progress-track{width:160px;height:4px;background:var(--bg2);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:4px;transition:width 0.5s ease}
+.progress-pct{font-size:0.7rem;color:var(--text3);font-weight:600;min-width:28px}
+.header-actions{display:flex;align-items:center;gap:8px}
+.save-badge{font-size:0.7rem;padding:4px 10px;border-radius:100px;background:var(--accent-light);color:var(--accent);font-weight:600;transition:all 0.3s}
+.save-badge.unsaved{background:#fef3cd;color:var(--warn)}
+.icon-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all 0.2s}
+.icon-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-ultra)}
+
+/* ===================== LAYOUT ===================== */
+.app-body{display:flex;min-height:calc(100vh - 60px)}
+
+/* ===================== SIDEBAR NAV ===================== */
+.sidebar{
+  width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+  padding:16px 10px;display:flex;flex-direction:column;gap:4px;
+  position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;
+}
+.sidebar-hint{font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;padding:4px 8px 8px;font-weight:600}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);
+  cursor:pointer;transition:all 0.18s;color:var(--text2);font-size:0.82rem;font-weight:500;
+  border:1px solid transparent;user-select:none;
+}
+.nav-item .drag-handle{color:var(--text3);font-size:0.7rem;cursor:grab;opacity:0.5}
+.nav-item:hover{background:var(--primary-ultra);color:var(--primary)}
+.nav-item.active{background:var(--primary-ultra);color:var(--primary);border-color:var(--primary);font-weight:600}
+.nav-item.done .step-num{background:var(--accent);color:white}
+.step-num{width:20px;height:20px;border-radius:50%;background:var(--bg2);color:var(--text3);font-size:0.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
+.nav-item.active .step-num{background:var(--primary);color:white}
+.step-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ===================== MAIN CONTENT ===================== */
+.main{flex:1;padding:28px;max-width:900px;min-width:0}
+
+/* ===================== SECTIONS ===================== */
+.section{display:none;animation:fadeUp 0.3s ease}
+.section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.section-header{margin-bottom:22px}
+.section-title{font-size:1.5rem;font-weight:700;color:var(--text);letter-spacing:-0.02em}
+.section-sub{font-size:0.83rem;color:var(--text3);margin-top:3px}
+
+/* ===================== CARDS ===================== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+.card-header{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+.card-icon{width:28px;height:28px;border-radius:6px;background:var(--primary-ultra);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:0.85rem}
+.card-title{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text2)}
+
+/* ===================== GRID ===================== */
+.grid{display:grid;gap:14px}
+.c2{grid-template-columns:1fr 1fr}
+.c3{grid-template-columns:1fr 1fr 1fr}
+.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+@media(max-width:700px){.c2,.c3,.c4{grid-template-columns:1fr}}
+
+/* ===================== FIELDS ===================== */
+.field{display:flex;flex-direction:column;gap:5px;position:relative}
+.field label{font-size:0.72rem;font-weight:600;color:var(--text2);letter-spacing:0.02em}
+.field input,.field select,.field textarea{
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text);font-family:'Inter',sans-serif;font-size:0.88rem;
+  padding:9px 12px;transition:border-color 0.2s,box-shadow 0.2s;outline:none;width:100%;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,95,168,0.1);
+}
+.field input:disabled,.field select:disabled{opacity:0.4;cursor:not-allowed}
+.field select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a5a6e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.field textarea{resize:vertical;min-height:70px}
+.req{color:var(--primary)}
+
+/* AUTOCOMPLETE */
+.autocomplete-list{
+  position:absolute;top:100%;left:0;right:0;z-index:500;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+  box-shadow:var(--shadow);max-height:200px;overflow-y:auto;margin-top:2px;display:none;
+}
+.autocomplete-list.open{display:block}
+.autocomplete-item{padding:9px 12px;font-size:0.85rem;cursor:pointer;color:var(--text);transition:background 0.15s}
+.autocomplete-item:hover,.autocomplete-item.focused{background:var(--primary-ultra);color:var(--primary)}
+.autocomplete-item small{display:block;font-size:0.72rem;color:var(--text3)}
+
+/* ===================== MEDICAL TABLE ===================== */
+.med-table{width:100%;border-collapse:collapse}
+.med-table th{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text2);padding:9px 10px;text-align:left;border-bottom:2px solid var(--border);background:var(--surface2)}
+.med-table td{padding:6px 5px;border-bottom:1px solid var(--border);vertical-align:middle}
+.med-table td:first-child{font-size:0.82rem;color:var(--text);font-weight:500;padding-left:10px;min-width:155px}
+.med-table tr:last-child td{border-bottom:none}
+.med-table tr.has-condition{background:rgba(14,164,122,0.04)}
+.med-table td input[type="text"],.med-table td input[type="date"]{
+  background:var(--surface2);border:1px solid var(--border);border-radius:5px;
+  color:var(--text);font-family:'Inter',sans-serif;font-size:0.8rem;padding:6px 9px;outline:none;width:100%;transition:border-color 0.2s;
+}
+.med-table td input:focus{border-color:var(--primary)}
+.med-table td .chk-wrap{display:flex;align-items:center;justify-content:center}
+.med-table td input[type="checkbox"]{width:17px;height:17px;cursor:pointer;accent-color:var(--primary)}
+.add-condition-btn{margin-top:10px;display:flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:600;color:var(--primary);cursor:pointer;padding:7px 12px;border:1px dashed var(--primary);border-radius:var(--radius-sm);background:var(--primary-ultra);transition:all 0.2s;width:fit-content}
+.add-condition-btn:hover{background:var(--primary);color:white}
+.del-row-btn{color:var(--danger);background:none;border:none;cursor:pointer;font-size:1rem;padding:3px 6px;border-radius:4px;transition:background 0.2s;opacity:0.6}
+.del-row-btn:hover{background:rgba(217,48,37,0.1);opacity:1}
+
+/* ===================== BENEFICIARY ===================== */
+.bene-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;position:relative}
+.bene-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.bene-num{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--primary)}
+.pct-badge{font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:100px;background:var(--primary-ultra);color:var(--primary)}
+.pct-total-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);margin-bottom:14px;font-size:0.82rem}
+.pct-total-bar.ok{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.pct-total-bar.err{background:#fde8e7;border-color:var(--danger);color:var(--danger)}
+.add-bene-btn{display:flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:600;color:var(--primary);cursor:pointer;padding:8px 14px;border:1px dashed var(--primary);border-radius:var(--radius-sm);background:var(--primary-ultra);transition:all 0.2s;margin-top:8px;width:fit-content}
+.add-bene-btn:hover{background:var(--primary);color:white}
+.del-bene-btn{position:absolute;top:14px;right:14px;background:none;border:none;cursor:pointer;color:var(--text3);font-size:1rem;padding:3px 6px;border-radius:4px;transition:all 0.2s}
+.del-bene-btn:hover{color:var(--danger);background:rgba(217,48,37,0.1)}
+
+/* ===================== BUTTONS ===================== */
+.nav-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;align-items:center}
+.btn{font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:600;padding:10px 22px;border-radius:100px;border:none;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+.btn-primary{background:var(--primary);color:white}
+.btn-primary:hover{background:var(--primary-light);transform:translateY(-1px);box-shadow:0 4px 14px rgba(26,95,168,0.3)}
+.btn-accent{background:var(--accent);color:white}
+.btn-accent:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(14,164,122,0.3)}
+.btn-danger{background:transparent;border:1px solid rgba(217,48,37,0.3);color:var(--danger);font-size:0.78rem;padding:8px 16px;margin-right:auto}
+.btn-danger:hover{background:rgba(217,48,37,0.08)}
+.btn-pdf{background:linear-gradient(135deg,var(--gold),#e09000);color:white}
+.btn-pdf:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(240,165,0,0.35)}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+/* ===================== SETTINGS MODAL ===================== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:14px;padding:28px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.2);transform:translateY(10px);transition:transform 0.25s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.theme-options{display:flex;gap:10px;margin-bottom:16px}
+.theme-opt{flex:1;padding:12px;border-radius:var(--radius);border:2px solid var(--border);cursor:pointer;text-align:center;transition:all 0.2s;font-size:0.82rem;font-weight:600;color:var(--text2)}
+.theme-opt:hover{border-color:var(--primary)}
+.theme-opt.active{border-color:var(--primary);background:var(--primary-ultra);color:var(--primary)}
+.theme-opt .theme-preview{width:100%;height:32px;border-radius:6px;margin-bottom:8px}
+.theme-opt.light-opt .theme-preview{background:linear-gradient(135deg,#f0f4f8,#ffffff)}
+.theme-opt.dark-opt .theme-preview{background:linear-gradient(135deg,#0d1b2a,#162435)}
+
+/* ===================== TOAST ===================== */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 22px;border-radius:100px;font-size:0.83rem;font-weight:600;z-index:2000;transition:transform 0.3s,opacity 0.3s;opacity:0;pointer-events:none;box-shadow:var(--shadow)}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast.ok{border-color:var(--accent);color:var(--accent)}
+#toast.err{border-color:var(--danger);color:var(--danger)}
+
+/* ===================== APP DESCRIPTION ===================== */
+.app-description{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px}
+.app-desc-icon{font-size:1.5rem;flex-shrink:0}
+.app-desc-text h3{font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.app-desc-text p{font-size:0.78rem;color:var(--text3);line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- ===================== HEADER ===================== -->
+<header class="app-header">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/></svg>
+    </div>
+    <span class="logo-text">Insure<span>Pro</span></span>
+  </div>
+  <div class="header-center">
+    <div class="header-title" id="step-indicator">Paso 1 de 7</div>
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="prog" style="width:14%"></div></div>
+      <span class="progress-pct" id="prog-pct">14%</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <span class="save-badge" id="save-badge">✓ Guardado</span>
+    <button class="icon-btn" onclick="openSettings()" title="Configuración">⚙️</button>
+    <button class="icon-btn" onclick="exportPDF()" title="Exportar PDF">📄</button>
+  </div>
+</header>
+
+<!-- ===================== BODY ===================== -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-hint">Secciones <span style="opacity:0.5">(arrastra para reordenar)</span></div>
+    <div id="nav-list">
+      <div class="nav-item active" data-sec="0" onclick="goTo(0)">
+        <span class="drag-handle">⠿</span><span class="step-num">1</span><span class="step-label">Datos Generales</span>
+      </div>
+      <div class="nav-item" data-sec="1" onclick="goTo(1)">
+        <span class="drag-handle">⠿</span><span class="step-num">2</span><span class="step-label">Historial Médico</span>
+      </div>
+      <div class="nav-item" data-sec="2" onclick="goTo(2)">
+        <span class="drag-handle">⠿</span><span class="step-num">3</span><span class="step-label">Doctor</span>
+      </div>
+      <div class="nav-item" data-sec="3" onclick="goTo(3)">
+        <span class="drag-handle">⠿</span><span class="step-num">4</span><span class="step-label">Antecedentes</span>
+      </div>
+      <div class="nav-item" data-sec="4" onclick="goTo(4)">
+        <span class="drag-handle">⠿</span><span class="step-num">5</span><span class="step-label">Empleo & Finanzas</span>
+      </div>
+      <div class="nav-item" data-sec="5" onclick="goTo(5)">
+        <span class="drag-handle">⠿</span><span class="step-num">6</span><span class="step-label">Beneficiarios</span>
+      </div>
+      <div class="nav-item" data-sec="6" onclick="goTo(6)">
+        <span class="drag-handle">⠿</span><span class="step-num">7</span><span class="step-label">Seguro & Banco</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- APP DESCRIPTION -->
+    <div class="app-description">
+      <div class="app-desc-icon">🛡️</div>
+      <div class="app-desc-text">
+        <h3>Sistema de Elegibilidad para Seguros de Vida</h3>
+        <p>Esta aplicación permite al agente de seguros recopilar de forma estructurada y segura toda la información necesaria para evaluar la elegibilidad de un cliente para una póliza de seguro de vida. Incluye datos personales, historial médico, antecedentes legales, situación financiera y beneficiarios. Los datos se guardan automáticamente en este dispositivo y pueden exportarse como PDF profesional.</p>
+      </div>
+    </div>
+
+    <!-- ===== SEC 0: DATOS GENERALES ===== -->
+    <div class="section active" id="sec-0">
+      <div class="section-header">
+        <div class="section-title">Datos Generales</div>
+        <div class="section-sub">Información personal e identificación del cliente</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📋</div><div class="card-title">Póliza & Fecha</div></div>
+        <div class="grid c2">
+          <div class="field"><label># DE PÓLIZA</label><input type="text" id="poliza" placeholder="POL-000123"></div>
+          <div class="field"><label>FECHA</label><input type="date" id="fecha"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">👤</div><div class="card-title">Información Personal</div></div>
+        <div class="grid c2" style="margin-bottom:14px">
+          <div class="field"><label>NOMBRES Y APELLIDOS <span class="req">*</span></label><input type="text" id="nombre" placeholder="Nombre completo"></div>
+          <div class="field"><label>CORREO ELECTRÓNICO</label><input type="email" id="email" placeholder="correo@ejemplo.com"></div>
+        </div>
+        <div class="grid c4">
+          <div class="field"><label>TELÉFONO</label><input type="tel" id="telefono" placeholder="(000) 000-0000"></div>
+          <div class="field"><label>FECHA NACIMIENTO</label><input type="date" id="dob"></div>
+          <div class="field"><label>EDAD</label><input type="number" id="edad" placeholder="0" min="0" max="120"></div>
+          <div class="field"><label>GÉNERO</label>
+            <select id="genero"><option value="">—</option><option value="F">Femenino</option><option value="M">Masculino</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🏠</div><div class="card-title">Dirección</div></div>
+        <div class="grid c2" style="margin-bottom:14px">
+          <div class="field" style="grid-column:1/-1">
+            <label>DIRECCIÓN <span class="req">*</span></label>
+            <input type="text" id="direccion" placeholder="Empiece a escribir su dirección..." autocomplete="off">
+            <div class="autocomplete-list" id="ac-direccion"></div>
+          </div>
+          <div class="field"><label>CIUDAD</label><input type="text" id="ciudad" placeholder="Ciudad"></div>
+          <div class="field"><label>ESTADO</label>
+            <select id="estado_dir">
+              <option value="">— Seleccionar —</option>
+              <option>Alabama</option><option>Alaska</option><option>Arizona</option><option>Arkansas</option><option>California</option>
+              <option>Colorado</option><option>Connecticut</option><option>Delaware</option><option>Florida</option><option>Georgia</option>
+              <option>Hawaii</option><option>Idaho</option><option>Illinois</option><option>Indiana</option><option>Iowa</option>
+              <option>Kansas</option><option>Kentucky</option><option>Louisiana</option><option>Maine</option><option>Maryland</option>
+              <option>Massachusetts</option><option>Michigan</option><option>Minnesota</option><option>Mississippi</option><option>Missouri</option>
+              <option>Montana</option><option>Nebraska</option><option>Nevada</option><option>New Hampshire</option><option>New Jersey</option>
+              <option>New Mexico</option><option>New York</option><option>North Carolina</option><option>North Dakota</option><option>Ohio</option>
+              <option>Oklahoma</option><option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option><option>South Carolina</option>
+              <option>South Dakota</option><option>Tennessee</option><option>Texas</option><option>Utah</option><option>Vermont</option>
+              <option>Virginia</option><option>Washington</option><option>West Virginia</option><option>Wisconsin</option><option>Wyoming</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid c3">
+          <div class="field"><label>CÓDIGO POSTAL</label><input type="text" id="cp" placeholder="00000"></div>
+          <div class="field"><label>LUGAR DE NACIMIENTO</label><input type="text" id="nacimiento" placeholder="País / Ciudad"></div>
+          <div class="field"><label>TIEMPO EN EL PAÍS</label><input type="text" id="tiempo_pais" placeholder="Ej. 5 años"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📏</div><div class="card-title">Medidas & Hábitos</div></div>
+        <div class="grid c4">
+          <div class="field"><label>PESO</label><input type="text" id="peso" placeholder="lbs / kg"></div>
+          <div class="field"><label>ALTURA</label><input type="text" id="altura" placeholder="ft'in / cm"></div>
+          <div class="field"><label>FUMADOR</label>
+            <select id="fumador" onchange="handleSmoker()">
+              <option value="">—</option><option value="Sí">Sí</option><option value="No">No</option>
+            </select>
+          </div>
+          <div class="field"><label>CIGARROS/DÍA</label><input type="number" id="cigarros" placeholder="0" min="0"></div>
+        </div>
+        <div class="grid c2" style="margin-top:12px">
+          <div class="field"><label>FUMA DESDE</label><input type="date" id="fuma_desde"></div>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar todo</button>
+        <button class="btn btn-primary" onclick="goTo(1)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- ===== SEC 1: HISTORIAL MÉDICO ===== -->
+    <div class="section" id="sec-1">
+      <div class="section-header">
+        <div class="section-title">Historial Médico</div>
+        <div class="section-sub">Marque las condiciones que aplican e ingrese los detalles</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🩺</div><div class="card-title">Condiciones y Diagnósticos</div></div>
+        <div style="overflow-x:auto">
+          <table class="med-table">
+            <thead><tr><th>Condición</th><th style="width:50px">¿Tiene?</th><th style="width:115px">Fecha</th><th>Prescripción</th><th>Detalle / Notas</th><th style="width:36px"></th></tr></thead>
+            <tbody id="med-tbody"></tbody>
+          </table>
+        </div>
+        <div class="add-condition-btn" onclick="addCustomCondition()">+ Añadir otra enfermedad</div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn btn-ghost" onclick="goTo(0)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(2)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- ===== SEC 2: DOCTOR ===== -->
+    <div class="section" id="sec-2">
+      <div class="section-header">
+        <div class="section-title">Doctor / Clínica</div>
+        <div class="section-sub">Médico principal y antecedentes familiares</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🏥</div><div class="card-title">Datos del Doctor</div></div>
+        <div class="grid c2" style="margin-bottom:14px">
+          <div class="field"><label>NOMBRE DEL DOCTOR / CLÍNICA</label><input type="text" id="doc_nombre" placeholder="Dr. / Clínica..."></div>
+          <div class="field"><label>ÚLTIMA VISITA</label><input type="date" id="doc_visita"></div>
+        </div>
+        <div class="grid c2">
+          <div class="field"><label>TELÉFONO</label><input type="tel" id="doc_tel" placeholder="(000) 000-0000"></div>
+          <div class="field">
+            <label>DIRECCIÓN</label>
+            <input type="text" id="doc_dir" placeholder="Dirección de la clínica..." autocomplete="off">
+            <div class="autocomplete-list" id="ac-doc_dir"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">👨‍👩‍👧</div><div class="card-title">Antecedentes Familiares</div></div>
+        <div class="grid c2">
+          <div class="field"><label>PADRE — VIVE</label><select id="padre_vive"><option value="">—</option><option>Sí</option><option>No</option></select></div>
+          <div class="field"><label>PADRE — EDAD / FALLECIMIENTO</label><input type="text" id="padre_edad" placeholder="Ej. 70 o Falleció 65"></div>
+          <div class="field"><label>MADRE — VIVE</label><select id="madre_vive"><option value="">—</option><option>Sí</option><option>No</option></select></div>
+          <div class="field"><label>MADRE — EDAD / FALLECIMIENTO</label><input type="text" id="madre_edad" placeholder="Ej. 68"></div>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn btn-ghost" onclick="goTo(1)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(3)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- ===== SEC 3: ANTECEDENTES ===== -->
+    <div class="section" id="sec-3">
+      <div class="section-header">
+        <div class="section-title">Antecedentes Legales</div>
+        <div class="section-sub">Historial legal, estatus migratorio e identificación</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">⚖️</div><div class="card-title">Antecedentes</div></div>
+        <div class="grid c2">
+          <div class="field"><label>ANTECEDENTES CRIMINALES</label><select id="criminal"><option value="">—</option><option>No</option><option>Sí</option></select></div>
+          <div class="field"><label>DETALLE</label><input type="text" id="criminal_det" placeholder="Descripción..."></div>
+          <div class="field"><label>ALCOHOL / DROGA</label><input type="text" id="alcohol" placeholder="Detalles..."></div>
+          <div class="field"><label>DUI</label><select id="dui"><option value="">—</option><option>No</option><option>Sí</option></select></div>
+          <div class="field"><label>FECHA DUI</label><input type="date" id="dui_fecha"></div>
+          <div class="field"><label>LICENCIA SUSPENDIDA</label><select id="lic_suspendida"><option value="">—</option><option>No</option><option>Sí</option></select></div>
+          <div class="field"><label>CORTE</label><input type="text" id="corte" placeholder="Tribunal..."></div>
+          <div class="field"><label>BANCARROTA</label><input type="text" id="bancarrota" placeholder="Detalles..."></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📄</div><div class="card-title">Estatus Migratorio</div></div>
+        <div class="grid c3" style="margin-bottom:14px">
+          <div class="field"><label>CIUDADANO</label><select id="ciudadano"><option value="">—</option><option>Sí</option><option>No</option></select></div>
+          <div class="field"><label>RESIDENTE</label><select id="residente"><option value="">—</option><option>Sí</option><option>No</option></select></div>
+          <div class="field"><label># RESIDENTE</label><input type="text" id="res_num" placeholder="#"></div>
+          <div class="field"><label>VENCIMIENTO RESIDENCIA</label><input type="date" id="res_exp"></div>
+          <div class="field"><label>PERMISO DE TRABAJO</label><select id="permiso"><option value="">—</option><option>Sí</option><option>No</option></select></div>
+          <div class="field"><label># PERMISO</label><input type="text" id="permiso_num" placeholder="#"></div>
+        </div>
+        <div class="grid c2">
+          <div class="field"><label>SSN / ITIN #</label><input type="text" id="ssn" placeholder="000-00-0000"></div>
+          <div class="field"><label>LICENCIA — ESTADO</label><input type="text" id="lic_estado" placeholder="FL, TX…"></div>
+          <div class="field"><label>LICENCIA — #</label><input type="text" id="lic_num" placeholder="Número"></div>
+          <div class="field"><label># ID / PASAPORTE</label><input type="text" id="id_num" placeholder="Número"></div>
+          <div class="field"><label>PAÍS (ID/PASAPORTE)</label><input type="text" id="id_pais" placeholder="País emisor"></div>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn btn-ghost" onclick="goTo(2)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(4)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- ===== SEC 4: EMPLEO & FINANZAS ===== -->
+    <div class="section" id="sec-4">
+      <div class="section-header">
+        <div class="section-title">Empleo & Finanzas</div>
+        <div class="section-sub">Situación laboral, ingresos y vivienda</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">💼</div><div class="card-title">Estatus Laboral</div></div>
+        <div class="grid c3" style="margin-bottom:14px">
+          <div class="field"><label>TRABAJA</label><select id="trabaja"><option value="">—</option><option>Sí</option><option>No</option></select></div>
+          <div class="field"><label>JUBILADO</label><select id="jubilado"><option value="">—</option><option>Sí</option><option>No</option></select></div>
+          <div class="field"><label>DESHABILITADO</label><select id="deshabilitado"><option value="">—</option><option>Sí</option><option>No</option></select></div>
+        </div>
+        <div class="grid c3">
+          <div class="field"><label>EMPLEADOR</label><input type="text" id="empleador" placeholder="Empresa..."></div>
+          <div class="field"><label>OCUPACIÓN</label><input type="text" id="ocupacion" placeholder="Cargo..."></div>
+          <div class="field"><label>TIEMPO EN COMPAÑÍA</label><input type="text" id="tiempo_empresa" placeholder="Ej. 3 años"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🏦</div><div class="card-title">Finanzas & Vivienda</div></div>
+        <div class="grid c2" style="margin-bottom:14px">
+          <div class="field"><label>INGRESO MENSUAL</label><input type="text" id="ingreso" placeholder="$"></div>
+          <div class="field"><label>GASTOS MENSUALES</label><input type="text" id="gastos" placeholder="$"></div>
+        </div>
+        <hr class="divider">
+        <div class="grid c4" style="margin-bottom:14px">
+          <div class="field"><label>CASA</label><select id="casa_tipo"><option value="">—</option><option>Renta</option><option>Dueño</option></select></div>
+          <div class="field"><label>DEUDA / HIPOTECA</label><input type="text" id="hipoteca" placeholder="$"></div>
+          <div class="field"><label>AÑOS HIPOTECA</label><input type="number" id="anos_hip" placeholder="0" min="0"></div>
+          <div class="field"><label>PERSONAS EN CASA</label><input type="number" id="personas_casa" placeholder="0" min="1" max="20"></div>
+        </div>
+        <hr class="divider">
+        <div class="grid c3">
+          <div class="field"><label>ESTADO CIVIL</label>
+            <select id="estado_civil"><option value="">—</option><option>Casado/a</option><option>Soltero/a</option><option>Viudo/a</option><option>Divorciado/a</option></select>
+          </div>
+          <div class="field" style="grid-column:span 2"><label>HIJOS MENORES DE 18 AÑOS</label><input type="text" id="hijos" placeholder="Nombres y edades"></div>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn btn-ghost" onclick="goTo(3)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(5)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- ===== SEC 5: BENEFICIARIOS ===== -->
+    <div class="section" id="sec-5">
+      <div class="section-header">
+        <div class="section-title">Beneficiarios</div>
+        <div class="section-sub">Principales y contingentes — Los porcentajes deben sumar exactamente 100%</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">👥</div><div class="card-title">Beneficiarios Principales</div></div>
+        <div id="pct-bar-p" class="pct-total-bar">⚖️ Total: <strong id="pct-total-p">0%</strong> — Se requiere 100%</div>
+        <div id="bene-principal-wrap"></div>
+        <div class="add-bene-btn" onclick="addBene('p')">+ Añadir beneficiario principal</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">👥</div><div class="card-title">Beneficiarios Contingentes</div></div>
+        <div id="pct-bar-c" class="pct-total-bar">⚖️ Total: <strong id="pct-total-c">0%</strong> — Se requiere 100%</div>
+        <div id="bene-contingente-wrap"></div>
+        <div class="add-bene-btn" onclick="addBene('c')">+ Añadir beneficiario contingente</div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn btn-ghost" onclick="goTo(4)">← Anterior</button>
+        <button class="btn btn-primary" onclick="validateBeneAndNext()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- ===== SEC 6: SEGURO & BANCO ===== -->
+    <div class="section" id="sec-6">
+      <div class="section-header">
+        <div class="section-title">Seguro Existente & Banco</div>
+        <div class="section-sub">Póliza actual y datos bancarios para pagos</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🛡️</div><div class="card-title">Seguro de Vida Existente</div></div>
+        <div class="grid c3">
+          <div class="field"><label>¿TIENE SEGURO?</label><select id="tiene_seguro"><option value="">—</option><option>Sí</option><option>No</option></select></div>
+          <div class="field"><label>TIPO DE PÓLIZA</label><select id="seg_tipo"><option value="">—</option><option>Privado</option><option>Trabajo</option></select></div>
+          <div class="field"><label>NOMBRE DE LA COMPAÑÍA</label><input type="text" id="seg_compania" placeholder="Nombre"></div>
+          <div class="field"><label>COBERTURA</label><input type="text" id="seg_cobertura" placeholder="$"></div>
+          <div class="field"><label>PRIMA MENSUAL</label><input type="text" id="seg_prima" placeholder="$"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🏦</div><div class="card-title">Datos Bancarios</div></div>
+        <div class="grid c2" style="margin-bottom:14px">
+          <div class="field">
+            <label>BANCO</label>
+            <select id="banco_nombre" onchange="handleBancoOtro()">
+              <option value="">— Seleccionar banco —</option>
+              <option>JPMorgan Chase</option><option>Bank of America</option><option>Wells Fargo</option><option>Citibank</option>
+              <option>U.S. Bank</option><option>Truist Bank</option><option>PNC Bank</option><option>Goldman Sachs</option>
+              <option>TD Bank</option><option>Capital One</option><option>Citizens Bank</option><option>Fifth Third Bank</option>
+              <option>Huntington Bank</option><option>KeyBank</option><option>Regions Bank</option><option>M&amp;T Bank</option>
+              <option>Comerica</option><option>Webster Bank</option><option>First Citizens Bank</option><option>Ally Bank</option>
+              <option>BMO Bank</option><option>BBVA USA</option><option>Santander Bank</option><option>HSBC USA</option>
+              <option>Zions Bank</option><option>Synovus Bank</option><option>First Horizon Bank</option><option>Wintrust Bank</option>
+              <option>Pacific Premier Bank</option><option>Glacier Bank</option><option>Old National Bank</option>
+              <option>South State Bank</option><option>Renasant Bank</option><option>Heartland Financial</option>
+              <option>Prosperity Bank</option><option>Cadence Bank</option><option>Ameris Bank</option>
+              <option>Community Bank</option><option>Pinnacle Financial</option><option>Banner Bank</option>
+              <option>Investors Bank</option><option>Valley National Bank</option><option>Customers Bank</option>
+              <option>Atlantic Union Bank</option><option>Northwest Bank</option><option>NBT Bank</option>
+              <option>TowneBank</option><option>Glacier Hills Bank</option><option>Seacoast Bank</option>
+              <option>Carter Bank &amp; Trust</option><option>Riverview Bank</option>
+              <option value="OTRO">Otro (ingresar manualmente)</option>
+            </select>
+          </div>
+          <div class="field" id="banco-otro-wrap" style="display:none"><label>NOMBRE DEL BANCO (OTRO)</label><input type="text" id="banco_otro" placeholder="Ingrese el nombre del banco"></div>
+          <div class="field"><label>ESTADO DE APERTURA</label>
+            <select id="banco_estado">
+              <option value="">— Estado —</option>
+              <option>Alabama</option><option>Alaska</option><option>Arizona</option><option>Arkansas</option><option>California</option>
+              <option>Colorado</option><option>Connecticut</option><option>Delaware</option><option>Florida</option><option>Georgia</option>
+              <option>Hawaii</option><option>Idaho</option><option>Illinois</option><option>Indiana</option><option>Iowa</option>
+              <option>Kansas</option><option>Kentucky</option><option>Louisiana</option><option>Maine</option><option>Maryland</option>
+              <option>Massachusetts</option><option>Michigan</option><option>Minnesota</option><option>Mississippi</option><option>Missouri</option>
+              <option>Montana</option><option>Nebraska</option><option>Nevada</option><option>New Hampshire</option><option>New Jersey</option>
+              <option>New Mexico</option><option>New York</option><option>North Carolina</option><option>North Dakota</option><option>Ohio</option>
+              <option>Oklahoma</option><option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option><option>South Carolina</option>
+              <option>South Dakota</option><option>Tennessee</option><option>Texas</option><option>Utah</option><option>Vermont</option>
+              <option>Virginia</option><option>Washington</option><option>West Virginia</option><option>Wisconsin</option><option>Wyoming</option>
+            </select>
+          </div>
+          <div class="field"><label># DE RUTA</label><input type="text" id="banco_ruta" placeholder="000000000"></div>
+          <div class="field"><label># DE CUENTA</label><input type="text" id="banco_cuenta" placeholder="# cuenta"></div>
+        </div>
+        <div class="grid c2">
+          <div class="field"><label>FECHA 1ER PAGO</label><input type="date" id="pago1"></div>
+          <div class="field"><label>FECHA SIGUIENTE PAGO</label><input type="date" id="pago2"></div>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn btn-ghost" onclick="goTo(5)">← Anterior</button>
+        <button class="btn btn-pdf" onclick="exportPDF()">📄 Exportar PDF</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <div class="modal-title">⚙️ Configuración</div>
+    <div style="font-size:0.78rem;color:var(--text3);margin-bottom:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em">Tema Visual</div>
+    <div class="theme-options">
+      <div class="theme-opt light-opt active" id="theme-light" onclick="setTheme('light')">
+        <div class="theme-preview"></div>Modo Claro
+      </div>
+      <div class="theme-opt dark-opt" id="theme-dark" onclick="setTheme('dark')">
+        <div class="theme-preview"></div>Modo Oscuro
+      </div>
+    </div>
+    <hr class="divider">
+    <div style="display:flex;justify-content:flex-end">
+      <button class="btn btn-primary" onclick="closeSettings()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ===================== SCRIPTS ===================== -->
+<script>
+'use strict';
+
+// ============================================================
+// CONDITIONS
+// ============================================================
+const DEFAULT_CONDITIONS = [
+  { name: 'Ataque al corazon', extras: [] },
+  { name: 'Derrame cerebral (Stroke)', extras: [] },
+  { name: 'Marcapasos / Stent', extras: [] },
+  { name: 'Cancer', extras: ['Remision','Estadio'] },
+  { name: 'Diabetes', extras: ['A1C'] },
+  { name: 'Presion Alta', extras: ['Sistolica','Diastolica','Ult. fecha Dr.'] },
+  { name: 'Neuropatia', extras: [] },
+  { name: 'Lupus', extras: [] },
+  { name: 'Asma', extras: [] },
+  { name: 'Tiroides', extras: [] },
+  { name: 'Enfermedad Higado', extras: [] },
+  { name: 'Enfermedad Rinones', extras: [] },
+  { name: 'Dialisis', extras: [] },
+  { name: 'Colesterol Alto', extras: [] },
+  { name: 'Depresion / Ansiedad', extras: [] },
+  { name: 'Bipolaridad / Parkinson', extras: [] },
+  { name: 'Demencia / Alzheimer', extras: [] },
+  { name: 'VIH / SIDA', extras: [] },
+  { name: 'Cirugia', extras: [] },
+  { name: 'Trasplante', extras: [] },
+];
+let customConditions = [];
+
+function getAllConditions() { return DEFAULT_CONDITIONS.concat(customConditions); }
+
+function buildMedTable() {
+  const tbody = document.getElementById('med-tbody');
+  tbody.innerHTML = '';
+  getAllConditions().forEach((c, i) => {
+    const isCustom = i >= DEFAULT_CONDITIONS.length;
+    addMedRow(tbody, c, i, isCustom);
+  });
+}
+
+function addMedRow(tbody, c, i, isCustom) {
+  const id = 'med_' + i;
+  const row = document.createElement('tr');
+  row.id = 'med-row-' + i;
+
+  let detHtml = '<input type="text" id="' + id + '_det" placeholder="Detalles...">';
+  if (c.extras && c.extras.length) {
+    detHtml = c.extras.map((e, j) =>
+      '<input type="text" id="' + id + '_ex' + j + '" placeholder="' + e + '" style="margin-bottom:3px">'
+    ).join('');
+  }
+  const nameCell = isCustom
+    ? '<input type="text" id="' + id + '_name" value="' + c.name + '" placeholder="Nombre condicion..." style="font-size:0.82rem;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);padding:2px;width:100%;outline:none">'
+    : c.name;
+
+  row.innerHTML =
+    '<td>' + nameCell + '</td>' +
+    '<td><div class="chk-wrap"><input type="checkbox" id="' + id + '_chk" onchange="highlightRow(' + i + ')"></div></td>' +
+    '<td><input type="date" id="' + id + '_fecha"></td>' +
+    '<td><input type="text" id="' + id + '_rx" placeholder="Medicamento..."></td>' +
+    '<td>' + detHtml + '</td>' +
+    '<td>' + (isCustom ? '<button class="del-row-btn" onclick="removeCustomCondition(' + (i - DEFAULT_CONDITIONS.length) + ')" title="Eliminar">×</button>' : '') + '</td>';
+  tbody.appendChild(row);
+}
+
+function highlightRow(i) {
+  const row = document.getElementById('med-row-' + i);
+  const chk = document.getElementById('med_' + i + '_chk');
+  if (row) row.className = chk && chk.checked ? 'has-condition' : '';
+}
+
+function addCustomCondition() {
+  const name = prompt('Nombre de la condicion o enfermedad:');
+  if (!name || !name.trim()) return;
+  customConditions.push({ name: name.trim(), extras: [] });
+  buildMedTable();
+  showToast('Condicion añadida', 'ok');
+}
+
+function removeCustomCondition(idx) {
+  customConditions.splice(idx, 1);
+  buildMedTable();
+}
+
+// Handle smoker
+function handleSmoker() {
+  const val = document.getElementById('fumador').value;
+  const noSmoke = val === 'No';
+  ['cigarros','fuma_desde'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.disabled = noSmoke; if (noSmoke) el.value = ''; }
+  });
+}
+
+// ============================================================
+// BENEFICIARIES
+// ============================================================
+const RELACIONES = [
+  'Conyuge','Esposo/a','Companero/a de vida','Hijo/a','Hijo/a adoptivo/a',
+  'Padrastro/Madrastra','Padre','Madre','Hermano/a','Abuelo/a','Nieto/a',
+  'Tio/a','Sobrino/a','Primo/a','Suegro/a','Cuñado/a','Amigo/a intimo/a',
+  'Fideicomiso','Organizacion Benefica','Otro'
+];
+
+let benePCounter = 0;
+let beneCCounter = 0;
+
+function addBene(type) {
+  const wrap = document.getElementById(type === 'p' ? 'bene-principal-wrap' : 'bene-contingente-wrap');
+  const counter = type === 'p' ? ++benePCounter : ++beneCCounter;
+  const prefix = type + counter;
+  const label = type === 'p' ? 'Principal' : 'Contingente';
+
+  const d = document.createElement('div');
+  d.className = 'bene-card';
+  d.id = 'bene-card-' + prefix;
+
+  const relOpts = RELACIONES.map(r => '<option value="' + r + '">' + r + '</option>').join('');
+
+  d.innerHTML =
+    '<button class="del-bene-btn" onclick="removeBene(\'' + prefix + '\',\'' + type + '\')" title="Eliminar">×</button>' +
+    '<div class="bene-card-header">' +
+      '<div class="bene-num">' + label + ' #' + counter + '</div>' +
+      '<div class="pct-badge" id="pct-badge-' + prefix + '">0%</div>' +
+    '</div>' +
+    '<div class="grid c2">' +
+      '<div class="field"><label>NOMBRE COMPLETO</label><input type="text" id="' + prefix + '_nombre" placeholder="Nombre"></div>' +
+      '<div class="field"><label>FECHA DE NACIMIENTO</label><input type="date" id="' + prefix + '_dob"></div>' +
+      '<div class="field"><label>RELACION</label>' +
+        '<select id="' + prefix + '_rel">' +
+          '<option value="">— Seleccionar relacion —</option>' + relOpts +
+        '</select>' +
+      '</div>' +
+      '<div class="field"><label>TELÉFONO</label><input type="tel" id="' + prefix + '_tel" placeholder="(000) 000-0000"></div>' +
+      '<div class="field"><label>PORCENTAJE (%)</label><input type="number" id="' + prefix + '_pct" placeholder="0" min="0" max="100" oninput="updatePctTotals()"></div>' +
+    '</div>';
+  wrap.appendChild(d);
+  updatePctTotals();
+}
+
+function removeBene(prefix, type) {
+  const card = document.getElementById('bene-card-' + prefix);
+  if (card) card.remove();
+  updatePctTotals();
+}
+
+function getPctList(type) {
+  const wrap = document.getElementById(type === 'p' ? 'bene-principal-wrap' : 'bene-contingente-wrap');
+  const inputs = wrap.querySelectorAll('input[type="number"]');
+  const vals = [];
+  inputs.forEach(inp => { const v = parseFloat(inp.value) || 0; vals.push({ el: inp, val: v }); });
+  return vals;
+}
+
+function updatePctTotals() {
+  ['p','c'].forEach(type => {
+    const list = getPctList(type);
+    const total = list.reduce((s, x) => s + x.val, 0);
+    const totalEl = document.getElementById('pct-total-' + type);
+    const bar = document.getElementById('pct-bar-' + type);
+    if (totalEl) totalEl.textContent = total.toFixed(0) + '%';
+    if (bar) {
+      bar.className = 'pct-total-bar' + (list.length === 0 ? '' : total === 100 ? ' ok' : ' err');
+      bar.innerHTML = total === 100
+        ? '✅ Total: <strong>' + total.toFixed(0) + '%</strong> — ¡Correcto!'
+        : '⚖️ Total: <strong>' + total.toFixed(0) + '%</strong> — Se requiere exactamente 100%';
+    }
+    // Update badges
+    list.forEach(x => {
+      const card = x.el.closest('.bene-card');
+      if (!card) return;
+      const badge = card.querySelector('.pct-badge');
+      if (badge) badge.textContent = x.val.toFixed(0) + '%';
+    });
+  });
+}
+
+function validateBeneAndNext() {
+  ['p','c'].forEach(type => {
+    const list = getPctList(type);
+    if (list.length === 0) return;
+    const total = list.reduce((s, x) => s + x.val, 0);
+    if (Math.abs(total - 100) > 0.01) {
+      showToast('Los porcentajes de beneficiarios ' + (type === 'p' ? 'principales' : 'contingentes') + ' deben sumar 100%', 'err');
+      return;
+    }
+  });
+  goTo(6);
+}
+
+// Init with one card
+addBene('p');
+
+// ============================================================
+// ADDRESS AUTOCOMPLETE (US cities/states simulation)
+// ============================================================
+const US_STREETS = [
+  { main: '100 Main St, Miami, FL 33101', city: 'Miami', state: 'Florida', zip: '33101' },
+  { main: '200 Brickell Ave, Miami, FL 33131', city: 'Miami', state: 'Florida', zip: '33131' },
+  { main: '1600 Pennsylvania Ave NW, Washington, DC 20500', city: 'Washington', state: 'District of Columbia', zip: '20500' },
+  { main: '350 Fifth Ave, New York, NY 10118', city: 'New York', state: 'New York', zip: '10118' },
+  { main: '233 S Wacker Dr, Chicago, IL 60606', city: 'Chicago', state: 'Illinois', zip: '60606' },
+  { main: '1 Infinite Loop, Cupertino, CA 95014', city: 'Cupertino', state: 'California', zip: '95014' },
+  { main: '500 W Temple St, Los Angeles, CA 90012', city: 'Los Angeles', state: 'California', zip: '90012' },
+  { main: '1 Microsoft Way, Redmond, WA 98052', city: 'Redmond', state: 'Washington', zip: '98052' },
+  { main: '1000 Corporate Dr, Fort Lauderdale, FL 33334', city: 'Fort Lauderdale', state: 'Florida', zip: '33334' },
+  { main: '2000 University Dr, Coral Springs, FL 33071', city: 'Coral Springs', state: 'Florida', zip: '33071' },
+  { main: '300 NW 2nd Ave, Miami, FL 33128', city: 'Miami', state: 'Florida', zip: '33128' },
+  { main: '700 NE 2nd Ave, Hialeah, FL 33010', city: 'Hialeah', state: 'Florida', zip: '33010' },
+  { main: '1500 W 49th St, Hialeah, FL 33012', city: 'Hialeah', state: 'Florida', zip: '33012' },
+  { main: '400 Crandon Blvd, Key Biscayne, FL 33149', city: 'Key Biscayne', state: 'Florida', zip: '33149' },
+  { main: '9000 SW 107th Ave, Miami, FL 33176', city: 'Miami', state: 'Florida', zip: '33176' },
+];
+
+function setupAddressAC(inputId, listId) {
+  const input = document.getElementById(inputId);
+  const list  = document.getElementById(listId);
+  if (!input || !list) return;
+  let idx = -1;
+
+  function update() {
+    const q = input.value.trim().toLowerCase();
+    list.innerHTML = '';
+    idx = -1;
+    if (q.length < 2) { list.classList.remove('open'); return; }
+
+    // Generate suggestions: repeat pattern with query
+    const matches = US_STREETS.filter(s => s.main.toLowerCase().includes(q));
+    // Also generate synthetic based on input
+    const synthetic = [];
+    if (q.length >= 3) {
+      ['St','Ave','Blvd','Dr','Rd','Way','Ln'].forEach(suffix => {
+        synthetic.push({ main: capitalizeWords(q) + ' ' + suffix + ', Miami, FL', city:'Miami', state:'Florida', zip:'33101' });
+      });
+    }
+    const all = [...matches, ...synthetic].slice(0, 8);
+
+    if (!all.length) { list.classList.remove('open'); return; }
+    all.forEach((s, i) => {
+      const li = document.createElement('div');
+      li.className = 'autocomplete-item';
+      li.innerHTML = '📍 ' + s.main + (s.city ? '<small>' + s.city + ', ' + s.state + '</small>' : '');
+      li.onclick = () => {
+        input.value = s.main;
+        if (s.city) {
+          const cityEl = document.getElementById('ciudad');
+          const stateEl = document.getElementById('estado_dir');
+          const zipEl = document.getElementById('cp');
+          if (cityEl && !cityEl.value) cityEl.value = s.city;
+          if (stateEl && !stateEl.value) stateEl.value = s.state;
+          if (zipEl && !zipEl.value && s.zip) zipEl.value = s.zip;
+        }
+        list.classList.remove('open');
+        scheduleAutoSave();
+      };
+      list.appendChild(li);
+    });
+    list.classList.add('open');
+  }
+
+  input.addEventListener('input', update);
+  input.addEventListener('keydown', (e) => {
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (e.key === 'ArrowDown') { idx = Math.min(idx + 1, items.length - 1); items.forEach((el,i) => el.classList.toggle('focused', i===idx)); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { idx = Math.max(idx - 1, 0); items.forEach((el,i) => el.classList.toggle('focused', i===idx)); e.preventDefault(); }
+    else if (e.key === 'Enter' && idx >= 0) { items[idx].click(); e.preventDefault(); }
+    else if (e.key === 'Escape') list.classList.remove('open');
+  });
+  document.addEventListener('click', (e) => { if (!input.contains(e.target) && !list.contains(e.target)) list.classList.remove('open'); });
+}
+
+function capitalizeWords(str) {
+  return str.replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// ============================================================
+// BANCO OTRO
+// ============================================================
+function handleBancoOtro() {
+  const val = document.getElementById('banco_nombre').value;
+  document.getElementById('banco-otro-wrap').style.display = val === 'OTRO' ? 'flex' : 'none';
+}
+
+// ============================================================
+// STEP NAVIGATION
+// ============================================================
+let currentStep = 0;
+const totalSteps = 7;
+let stepOrder = [0,1,2,3,4,5,6];
+
+function goTo(n) {
+  scheduleAutoSave();
+  document.getElementById('sec-' + currentStep).classList.remove('active');
+  updateNavItems(currentStep, 'done');
+  currentStep = n;
+  document.getElementById('sec-' + n).classList.add('active');
+  updateNavItems(n, 'active');
+  const pct = Math.round(((n + 1) / totalSteps) * 100);
+  document.getElementById('prog').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('step-indicator').textContent = 'Paso ' + (n + 1) + ' de ' + totalSteps;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateNavItems(n, cls) {
+  const items = document.querySelectorAll('.nav-item');
+  items.forEach(item => {
+    if (parseInt(item.getAttribute('data-sec')) === n) {
+      item.classList.remove('active','done');
+      item.classList.add(cls);
+    }
+  });
+}
+
+// SORTABLE SIDEBAR
+Sortable.create(document.getElementById('nav-list'), {
+  animation: 180,
+  handle: '.drag-handle',
+  ghostClass: 'sortable-ghost',
+  onEnd: function() {
+    const items = document.querySelectorAll('.nav-item');
+    items.forEach((item, i) => {
+      const num = item.querySelector('.step-num');
+      if (num) num.textContent = i + 1;
+    });
+  }
+});
+
+// ============================================================
+// INDEXED DB
+// ============================================================
+const DB_NAME = 'ElegibilidadDB2';
+const STORE   = 'formData';
+const KEY     = 'current';
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore(STORE, { keyPath: 'id' });
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror   = e => reject(e);
+  });
+}
+
+function getAllFields() {
+  return Array.from(document.querySelectorAll('input[id], select[id], textarea[id]'));
+}
+
+function collectData() {
+  const data = { id: KEY, customConditions, theme: currentTheme };
+  getAllFields().forEach(el => {
+    data[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  // bene counts
+  data._benePCounter = benePCounter;
+  data._beneCCounter = beneCCounter;
+  return data;
+}
+
+function restoreData(data) {
+  if (data.customConditions) { customConditions = data.customConditions; buildMedTable(); }
+  if (data.theme) setTheme(data.theme, true);
+
+  // Restore bene cards
+  if (data._benePCounter > 1) {
+    for (let i = 2; i <= data._benePCounter; i++) addBene('p');
+  }
+  if (data._beneCCounter > 0) {
+    for (let i = 1; i <= data._beneCCounter; i++) addBene('c');
+  }
+
+  getAllFields().forEach(el => {
+    if (!(el.id in data)) return;
+    if (el.type === 'checkbox') el.checked = data[el.id];
+    else el.value = data[el.id];
+  });
+  handleSmoker();
+  handleBancoOtro();
+  updatePctTotals();
+}
+
+let saveTimer = null;
+function scheduleAutoSave() {
+  const badge = document.getElementById('save-badge');
+  if (badge) { badge.textContent = '● Sin guardar'; badge.className = 'save-badge unsaved'; }
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToIDB, 1200);
+}
+
+function saveToIDB() {
+  if (!db) return;
+  const tx = db.transaction(STORE, 'readwrite');
+  tx.objectStore(STORE).put(collectData());
+  tx.oncomplete = () => {
+    const badge = document.getElementById('save-badge');
+    if (badge) { badge.textContent = '✓ Guardado'; badge.className = 'save-badge'; }
+  };
+}
+
+function loadFromIDB() {
+  if (!db) return;
+  const tx = db.transaction(STORE, 'readonly');
+  const req = tx.objectStore(STORE).get(KEY);
+  req.onsuccess = e => { if (e.target.result) restoreData(e.target.result); };
+}
+
+function clearAll() {
+  if (!confirm('¿Seguro que quieres limpiar todos los datos del formulario?')) return;
+  getAllFields().forEach(el => { if (el.type === 'checkbox') el.checked = false; else el.value = ''; });
+  customConditions = [];
+  buildMedTable();
+  document.getElementById('bene-principal-wrap').innerHTML = '';
+  document.getElementById('bene-contingente-wrap').innerHTML = '';
+  benePCounter = 0; beneCCounter = 0;
+  addBene('p');
+  if (db) { const tx = db.transaction(STORE,'readwrite'); tx.objectStore(STORE).delete(KEY); }
+  showToast('Formulario limpiado', 'ok');
+}
+
+document.addEventListener('input', scheduleAutoSave);
+document.addEventListener('change', scheduleAutoSave);
+
+openDB().then(loadFromIDB).catch(console.error);
+
+// ============================================================
+// THEME
+// ============================================================
+let currentTheme = 'light';
+function setTheme(t, silent) {
+  currentTheme = t;
+  document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : '');
+  document.getElementById('theme-light').classList.toggle('active', t === 'light');
+  document.getElementById('theme-dark').classList.toggle('active', t === 'dark');
+  if (!silent) { scheduleAutoSave(); showToast(t === 'dark' ? '🌙 Modo oscuro activado' : '☀️ Modo claro activado', 'ok'); }
+}
+
+// ============================================================
+// SETTINGS MODAL
+// ============================================================
+function openSettings() { document.getElementById('settings-modal').classList.add('open'); }
+function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+document.getElementById('settings-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeSettings(); });
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + (type || '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = type || ''; }, 3000);
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function v(id) {
+  const el = document.getElementById(id);
+  if (!el) return '';
+  if (el.type === 'checkbox') return el.checked ? 'Si' : '';
+  return el.value || '';
+}
+
+function getBancoName() {
+  const sel = v('banco_nombre');
+  if (sel === 'OTRO') return v('banco_otro');
+  return sel;
+}
+
+function getMedRows() {
+  return getAllConditions().map((c, i) => {
+    const id = 'med_' + i;
+    const chk = document.getElementById(id + '_chk');
+    if (!chk || !chk.checked) return null;
+    let det = v(id + '_det');
+    if (c.extras && c.extras.length) {
+      det = c.extras.map((e, j) => { const val = v(id + '_ex' + j); return val ? e + ': ' + val : ''; }).filter(Boolean).join('; ');
+    }
+    const name = document.getElementById(id + '_name') ? v(id + '_name') : c.name;
+    return [name, v(id + '_fecha'), v(id + '_rx'), det];
+  }).filter(Boolean);
+}
+
+function getBeneData(type) {
+  const wrap = document.getElementById(type === 'p' ? 'bene-principal-wrap' : 'bene-contingente-wrap');
+  const cards = wrap.querySelectorAll('.bene-card');
+  const rows = [];
+  cards.forEach(card => {
+    const inputs = card.querySelectorAll('input[type="text"],input[type="date"],input[type="tel"],select,input[type="number"]');
+    const nombre = card.querySelector('input[id$="_nombre"]');
+    if (!nombre || !nombre.value) return;
+    const rel    = card.querySelector('select');
+    const dob    = card.querySelector('input[id$="_dob"]');
+    const tel    = card.querySelector('input[id$="_tel"]');
+    const pct    = card.querySelector('input[type="number"]');
+    rows.push([
+      nombre ? nombre.value : '',
+      dob    ? dob.value    : '',
+      rel    ? rel.value    : '',
+      tel    ? tel.value    : '',
+      pct    ? (pct.value + '%') : '',
+    ]);
+  });
+  return rows;
+}
+
+// ============================================================
+// AUTO-AGE
+// ============================================================
+document.getElementById('dob').addEventListener('change', function() {
+  if (!this.value) return;
+  document.getElementById('edad').value = Math.floor((new Date() - new Date(this.value)) / (365.25*24*3600*1000));
+});
+
+// ============================================================
+// PDF EXPORT
+// ============================================================
+function exportPDF() {
+  saveToIDB();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+  const PW = 215.9, PH = 279.4, ML = 9, MR = 9, UW = PW - ML - MR;
+  let y = 0;
+
+  const C_NAVY  = [13, 27, 42];
+  const C_BLUE  = [26, 95, 168];
+  const C_LIGHT = [237, 244, 252];
+  const C_ALT   = [222, 235, 250];
+  const C_DTEXT = [30, 55, 85];
+  const C_GRAY  = [100, 125, 152];
+  const C_WHITE = [255, 255, 255];
+
+  // BG
+  doc.setFillColor(248, 251, 255);
+  doc.rect(0, 0, PW, PH, 'F');
+
+  // HEADER
+  doc.setFillColor(...C_BLUE);
+  doc.rect(0, 0, PW, 18, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(...C_WHITE);
+  doc.text('INSUREPRO — FORMULARIO DE ELEGIBILIDAD', ML, 11.5);
+  const poliza = v('poliza'), fecha = v('fecha');
+  let hdr = '';
+  if (poliza) hdr += 'Poliza: ' + poliza;
+  if (fecha)  hdr += (poliza ? '   ' : '') + 'Fecha: ' + fecha;
+  if (hdr) { doc.setFontSize(7.5); doc.text(hdr, PW - MR, 11.5, { align: 'right' }); }
+  doc.setFillColor(0, 194, 168);
+  doc.rect(0, 18, PW, 2, 'F');
+  y = 26;
+
+  function secHead(title, icon) {
+    if (y > PH - 35) { doc.addPage(); doc.setFillColor(248,251,255); doc.rect(0,0,PW,PH,'F'); y = 14; }
+    doc.setFillColor(...C_BLUE);
+    doc.roundedRect(ML, y, UW, 6.5, 1.2, 1.2, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.2);
+    doc.setTextColor(...C_WHITE);
+    doc.text((icon || '') + ' ' + title.toUpperCase(), ML + 3, y + 4.4);
+    y += 8;
+  }
+
+  function kvGrid(pairs, cols) {
+    cols = cols || 4;
+    const cw = UW / cols;
+    const rh = 7.5;
+    const valid = pairs.filter(p => p[1]);
+    if (!valid.length) { y += 2; return; }
+    let col = 0;
+    valid.forEach(p => {
+      if (y + rh > PH - 14) { doc.addPage(); doc.setFillColor(248,251,255); doc.rect(0,0,PW,PH,'F'); y = 14; }
+      const x = ML + col * cw;
+      doc.setFillColor(...C_LIGHT);
+      doc.roundedRect(x + 0.3, y, cw - 0.6, rh, 0.8, 0.8, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(5.2); doc.setTextColor(...C_GRAY);
+      doc.text(p[0].toUpperCase(), x + 2, y + 2.8);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(...C_DTEXT);
+      const lines = doc.splitTextToSize(String(p[1]), cw - 4);
+      doc.text(lines[0], x + 2, y + 5.8);
+      col++;
+      if (col >= cols) { col = 0; y += rh + 0.5; }
+    });
+    if (col > 0) y += rh + 0.5;
+    y += 2;
+  }
+
+  function aTable(head, body, colW) {
+    if (!body.length) return;
+    if (y > PH - 35) { doc.addPage(); doc.setFillColor(248,251,255); doc.rect(0,0,PW,PH,'F'); y = 14; }
+    const cs = {};
+    if (colW) colW.forEach((w, i) => { cs[i] = { cellWidth: w }; });
+    doc.autoTable({
+      startY: y, margin: { left: ML, right: MR },
+      head: [head], body,
+      styles: { fontSize: 6.3, cellPadding: [2,2,2,2], font: 'helvetica', textColor: C_DTEXT, fillColor: C_LIGHT },
+      headStyles: { fillColor: C_BLUE, textColor: C_WHITE, fontStyle: 'bold', fontSize: 6.3, cellPadding: [2.5,2,2.5,2] },
+      alternateRowStyles: { fillColor: C_ALT },
+      columnStyles: cs, tableWidth: UW, theme: 'plain',
+    });
+    y = doc.lastAutoTable.finalY + 3;
+  }
+
+  // SECTIONS
+  secHead('Datos Personales', '👤');
+  kvGrid([
+    ['Nombre', v('nombre')], ['Telefono', v('telefono')], ['Correo', v('email')], ['Genero', v('genero')],
+    ['Nacimiento', v('dob')], ['Edad', v('edad')], ['Lugar Nac.', v('nacimiento')], ['Tiempo Pais', v('tiempo_pais')],
+    ['Direccion', v('direccion')], ['Ciudad', v('ciudad')], ['Estado', v('estado_dir')], ['CP', v('cp')],
+    ['Peso', v('peso')], ['Altura', v('altura')], ['Fumador', v('fumador')], ['Cigarros/dia', v('cigarros')],
+  ], 4);
+
+  const medRows = getMedRows();
+  if (medRows.length) {
+    secHead('Historial Medico — Condiciones Activas', '🩺');
+    aTable(['Condicion','Fecha','Prescripcion','Detalle'], medRows, [42,22,50,UW-114]);
+  }
+
+  secHead('Doctor / Clinica & Familia', '🏥');
+  kvGrid([
+    ['Doctor/Clinica', v('doc_nombre')], ['Ultima Visita', v('doc_visita')],
+    ['Tel. Doctor', v('doc_tel')], ['Dir. Doctor', v('doc_dir')],
+    ['Padre Vive', v('padre_vive')], ['Edad Padre', v('padre_edad')],
+    ['Madre Vive', v('madre_vive')], ['Edad Madre', v('madre_edad')],
+  ], 4);
+
+  secHead('Antecedentes Legales & Migratorios', '⚖️');
+  kvGrid([
+    ['Antec. Criminales', v('criminal')], ['Detalle', v('criminal_det')],
+    ['DUI', v('dui')], ['Fecha DUI', v('dui_fecha')],
+    ['Lic. Suspendida', v('lic_suspendida')], ['Bancarrota', v('bancarrota')],
+    ['Ciudadano', v('ciudadano')], ['Residente', v('residente')],
+    ['# Residencia', v('res_num')], ['Venc. Res.', v('res_exp')],
+    ['Permiso Trabajo', v('permiso')], ['SSN / ITIN', v('ssn')],
+    ['Lic. #', v('lic_num')], ['Estado Lic.', v('lic_estado')],
+    ['# ID / Pasaporte', v('id_num')], ['Pais ID', v('id_pais')],
+  ], 4);
+
+  secHead('Empleo, Finanzas & Estado Civil', '💼');
+  kvGrid([
+    ['Trabaja', v('trabaja')], ['Jubilado', v('jubilado')],
+    ['Deshabilitado', v('deshabilitado')], ['Empleador', v('empleador')],
+    ['Ocupacion', v('ocupacion')], ['Tiempo Empresa', v('tiempo_empresa')],
+    ['Ingreso Mens.', v('ingreso')], ['Gastos Mens.', v('gastos')],
+    ['Casa', v('casa_tipo')], ['Hipoteca', v('hipoteca')],
+    ['Anos Hipoteca', v('anos_hip')], ['Personas en Casa', v('personas_casa')],
+    ['Estado Civil', v('estado_civil')], ['Hijos <18', v('hijos')], ['',''], ['',''],
+  ], 4);
+
+  const bpRows = getBeneData('p');
+  const bcRows = getBeneData('c');
+  const allBene = bpRows.map(r => ['Principal', ...r]).concat(bcRows.map(r => ['Contingente', ...r]));
+  if (allBene.length) {
+    secHead('Beneficiarios', '👥');
+    aTable(['Tipo','Nombre','Nacimiento','Relacion','Telefono','%'],
+      allBene, [22, UW-22-22-30-26-14, 22, 30, 26, 14]);
+  }
+
+  secHead('Seguro Existente & Datos Bancarios', '🏦');
+  kvGrid([
+    ['Tiene Seguro', v('tiene_seguro')], ['Tipo Poliza', v('seg_tipo')],
+    ['Compania', v('seg_compania')], ['Cobertura', v('seg_cobertura')],
+    ['Prima Mensual', v('seg_prima')], ['Banco', getBancoName()],
+    ['Estado Banco', v('banco_estado')], ['# Ruta', v('banco_ruta')],
+    ['# Cuenta', v('banco_cuenta')], ['1er Pago', v('pago1')],
+    ['Sig. Pago', v('pago2')], ['',''],
+  ], 4);
+
+  // FOOTER
+  const totalPgs = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= totalPgs; p++) {
+    doc.setPage(p);
+    doc.setFillColor(...C_BLUE);
+    doc.rect(0, PH - 9, PW, 9, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.setTextColor(...C_WHITE);
+    doc.text('InsurePro — Formulario de Elegibilidad — CONFIDENCIAL', ML, PH - 4);
+    doc.text('Pagina ' + p + ' / ' + totalPgs, PW - MR, PH - 4, { align: 'right' });
+  }
+
+  const nombre = v('nombre') || 'cliente';
+  doc.save('Elegibilidad_' + nombre.replace(/[^a-zA-Z0-9]/g,'_') + '.pdf');
+  showToast('✓ PDF exportado correctamente', 'ok');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+buildMedTable();
+setupAddressAC('direccion', 'ac-direccion');
+setupAddressAC('doc_dir', 'ac-doc_dir');
+
+// Set today's date by default
+document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+</script>
+
+<!--
+═══════════════════════════════════════════════════════════════
+  DESCRIPCIÓN DE LA APLICACIÓN
+═══════════════════════════════════════════════════════════════
+  InsurePro — Sistema de Elegibilidad para Seguros de Vida
+
+  Esta aplicación web de una sola página (SPA) está diseñada
+  para que agentes de seguros puedan recopilar, organizar y
+  exportar toda la información necesaria para evaluar la
+  elegibilidad de un cliente para una póliza de seguro de vida.
+
+  CARACTERÍSTICAS PRINCIPALES:
+  ─────────────────────────────
+  • Formulario paso a paso con 7 secciones:
+    1. Datos Generales: información personal, dirección con
+       autocompletado de direcciones en EE.UU., medidas.
+    2. Historial Médico: tabla de condiciones con checkbox,
+       fecha, prescripción y notas. Botón para añadir
+       enfermedades personalizadas. Fumador desactiva campos
+       relacionados si se selecciona "No".
+    3. Doctor/Clínica: datos del médico principal y
+       antecedentes familiares.
+    4. Antecedentes Legales: historial criminal, DUI,
+       licencias y estatus migratorio.
+    5. Empleo & Finanzas: empleo, ingresos, vivienda,
+       personas en casa y estado civil.
+    6. Beneficiarios: tarjetas dinámicas con relación
+       desplegable y validación de porcentajes (suma = 100%).
+    7. Seguro & Banco: póliza existente y datos bancarios
+       con listado de bancos de EE.UU.
+
+  PERSISTENCIA:
+  ─────────────
+  • Los datos se guardan automáticamente en IndexedDB del
+    navegador (sin servidor, totalmente local y privado).
+  • Los datos persisten entre sesiones en el mismo dispositivo.
+  • Botón "Limpiar todo" borra datos del formulario e IndexedDB.
+
+  EXPORTACIÓN PDF:
+  ─────────────────
+  • Genera un PDF profesional en formato Carta usando jsPDF
+    y jsPDF-AutoTable.
+  • Todas las secciones se organizan en tablas compactas de
+    4 columnas con etiquetas y valores claramente distinguidos.
+  • Solo las condiciones médicas marcadas como activas aparecen.
+  • Encabezado con logo, número de póliza y fecha.
+  • Pie de página con número de página en cada hoja.
+
+  PERSONALIZACIÓN:
+  ─────────────────
+  • Modo claro y oscuro configurable desde el botón ⚙️.
+  • Tabs de navegación reorganizables por arrastre (drag & drop).
+
+  TECNOLOGÍAS USADAS:
+  ─────────────────────
+  • HTML5, CSS3 Variables, JavaScript ES6+
+  • IndexedDB para almacenamiento local
+  • jsPDF 2.5.1 + jsPDF-AutoTable 3.8.2 para exportación PDF
+  • SortableJS 1.15.0 para tabs arrastrables
+  • Google Fonts: Inter
+  • Autocompletado de direcciones con base de datos local
+    (sin API externa requerida)
+═══════════════════════════════════════════════════════════════
+-->
+</body>
+</html>
